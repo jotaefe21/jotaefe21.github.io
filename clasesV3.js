@@ -70,7 +70,6 @@
           this.r = sqrt(this.mass) * 2;
 
           this.changeDir = function (){
-    
             this.vel.mult(-1);
        }
         }
