@@ -17,7 +17,7 @@
       
         applyForce(force) {
           let f = p5.Vector.div(force, this.mass);
-          let f.mult(0.1); // reducir fuerza
+          f.mult(0.1); // reducir fuerza
           this.acc.add(f);
         }
       
@@ -77,7 +77,7 @@
       
         applyForce(force) {
           let f = p5.Vector.div(force, this.mass);
-          let f.mult(0.1); // reducir fuerza
+          f.mult(0.1); // reducir fuerza
           this.acc.add(f);
         }
       
@@ -144,7 +144,7 @@
       
         applyForce(force) {
           let f = p5.Vector.div(force, this.mass);
-          let f.mult(0.1); // reducir fuerza
+          f.mult(0.1); // reducir fuerza
           this.acc.add(f);
         }
       
