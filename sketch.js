@@ -1,6 +1,37 @@
 
 const { Engine, World, Bodies, Composite } = Matter;
-//Matter.use('matter-attractors');
+Matter.use('matter-attractors');
+
+//----SONIDO----
+let monitorear = true;
+
+let FREC_MIN = 900;
+let FREC_MAX = 2000;
+
+let AMP_MIN = 0.01;
+let AMP_MAX = 0.4;
+
+
+let mic;
+let pitch;
+let audioContext;
+
+let gestorAmp;
+let gestorPitch;
+
+let haySonido; // estado de cómo está el sonido en cada momento
+let antesHabiaSonido; // moemoria del estado anterior del sonido
+
+
+const model_url = 'https://cdn.jsdelivr.net/gh/ml5js/ml5-data-and-models/models/pitch-detection/crepe/';
+
+let marca;
+let tiempoLimiteAgregar = 3000;
+let tiempoLimiteGrosor = 3000;
+let tiempoLimiteColor = 3000;
+let tiempoLimiteFin = 3000;
+
+//----OTROS----
 let estado = 0;
 let engine;
 let world;
@@ -17,6 +48,8 @@ let cRectPrev;
 let colores = [];
 let coloresDes = [];
 let selector = 0;
+
+
 
 
 function setup() {
@@ -41,6 +74,20 @@ function setup() {
     cCirclePrev = coloresDes[0]
     cRectPrev = coloresDes[2];
 
+  //----SONIDO----
+  audioContext = getAudioContext(); // inicia el motor de audio
+  mic = new p5.AudioIn(); // inicia el micrófono
+  mic.start(startPitch); // se enciende el micrófono y le transmito el analisis de frecuencia (pitch) al micrófono. Conecto la libreria con el micrófono
+
+
+  userStartAudio();// por la dudas para forzar inicio de audio en algunos navegadores
+
+  gestorAmp =  new GestorSenial( AMP_MIN, AMP_MAX);
+  gestorPitch = new GestorSenial( FREC_MIN, FREC_MAX);
+
+  antesHabiaSonido = false;
+  //----SONIDO----
+
     for (let i = 0; i < circles.length; i++) {
       circles[i] = new Circle(x, y, tamanioX);
     }
@@ -56,20 +103,63 @@ function setup() {
     boundaries.push(new Boundary(width, height/2, width, 20, PI/2)); //PARED IZQ
     boundaries.push(new Boundary(width/2, 0, width, 20, 0)); //TECHO
 
+    world.gravity.scale = 0;
+
+    /*var attractiveBody = Bodies.circle(
+      render.options.width / 2,
+      render.options.height / 2,
+      50, 
+      {
+      isStatic: true,
+  
+      // example of an attractor function that 
+      // returns a force vector that applies to bodyB
+      plugin: {
+        attractors: [
+          function(bodyA, bodyB) {
+            return {
+              x: (bodyA.position.x - bodyB.position.x) * 1e-6,
+              y: (bodyA.position.y - bodyB.position.y) * 1e-6,
+            };
+          }
+        ]
+      }
+    });
+  
+    World.add(world, attractiveBody);
+  
+    // add some bodies that to be attracted
+    for (var i = 0; i < 150; i += 1) {
+      var body = Bodies.polygon(
+        Common.random(0, render.options.width), 
+        Common.random(0, render.options.height),
+        Common.random(1, 5),
+        Common.random() > 0.9 ? Common.random(15, 25) : Common.random(5, 10)
+      );
+  
+      World.add(world, body);
+    }
+  
+*/
+
+
 }
     
-function mouseClicked() {
-    if (estado === 0 ) { //DIBUJA CIRCULOS
-    circles.push(new Circle(mouseX, mouseY, tamanioX/2, cCircle));
-    }
-
-    if (estado === 1 ) { //DIBUJA RECTANGULOS
-    rectangles.push(new Rectangle(mouseX, mouseY, tamanioX, tamanioY, cRect));
-        }
-}
 
 function draw() {
     background(233);
+
+    //----SONIDO----
+    let vol = mic.getLevel(); // cargo en vol la amplitud del micrófono (señal cruda);
+    gestorAmp.actualizar(vol);
+
+    haySonido = gestorAmp.filtrada > 0.1; // umbral de ruido que define el estado haySonido
+
+    let inicioElSonido = haySonido && !antesHabiaSonido; // evendo de INICIO de un sonido
+    
+    let finDelSonido = !haySonido && antesHabiaSonido; // evento de fIN de un sonido
+    //----SONIDO----
+
     cRect = colores[selector];
     cCircle = colores[selector];
     cCirclePrev = coloresDes[selector];
@@ -108,17 +198,21 @@ function draw() {
     for (let i = 0; i < boundaries.length; i++) {
         boundaries[i].show();
     }
+
+    if(monitorear){
+      console.log("hay sonido?",haySonido);
+      console.log("la frec esta en: ",gestorPitch.filtrada);
+      console.log("la amp esta en: ",gestorAmp.filtrada);
+      gestorAmp.dibujar(100, 100);
+      gestorPitch.dibujar(100, 300);
+    }
+
+    antesHabiaSonido =  haySonido;
+  
 }
 
 // FUNCIONES DE ESTADO; CAMBIA FIGURA
-function mouseWheel(event) {
-    if (event.deltaY > 0) {
-      estado++;
-    } else {
-      estado--;
-    }
-    limitar();
-  }
+
   
   function limitar() {
     if (estado > 2) {
@@ -127,78 +221,39 @@ function mouseWheel(event) {
     else if (estado <0 ){
       estado = 2;
     }
-    console.log (estado);
+    //console.log (estado);
   }
 
-  function keyPressed() {
-    /*
-    if (keyCode === ENTER) {
-      rectangles.pop();
-      circles.pop();
-      background(233);
-    }
-    */
-  
-    if (key === "w") { // GRAVEDAD HACIA ARRIBA
-        engine.gravity.x = 0;
-        engine.gravity.y = -1;
-        console.log(engine.gravity.x, engine.gravity.y, engine.gravity.scale)
-      }
-    if (key === "a") { // GRAVEDAD HACIA IZQUIERDA
-       engine.gravity.x = -1;
-       engine.gravity.y = 0;
-       console.log(engine.gravity.x, engine.gravity.y, engine.gravity.scale)
-     }
-    if (key === 'd') { // GRAVEDAD HACIA DERECHA
-       engine.gravity.x = 1;
-       engine.gravity.y = 0;
-       console.log(engine.gravity.x, engine.gravity.y, engine.gravity.scale)
-    }
-    if (key === 's') { // GRAVEDAD HACIA ABAJO
-        engine.gravity.x = 0;
-        engine.gravity.y = 1;
-        console.log(engine.gravity.x, engine.gravity.y, engine.gravity.scale)
-     } 
-
-     if (key === 'e') { // AUMENTA GRAVEDAD
-        engine.gravity.scale += 0.001;
-        console.log(engine.gravity.x, engine.gravity.y, engine.gravity.scale)
-    } 
-     if (key === 'q') { // DISMINUYE GRAVEDAD
-        engine.gravity.scale -= 0.001;
-        console.log(engine.gravity.x, engine.gravity.y, engine.gravity.scale)
-     } 
-
-    if (keyCode === UP_ARROW) {
-      tamanioX=tamanioX+10;
-      console.log("tamanioX= " + tamanioX);
-      console.log("tamanioY= " + tamanioY);
-    }
-    if (keyCode === DOWN_ARROW) {
-      tamanioX=tamanioX-10;
-      console.log("tamanioX= " + tamanioX);
-      console.log("tamanioY= " + tamanioY);
-    }
-    if (keyCode === LEFT_ARROW) {
-      tamanioY=tamanioY-10;
-      console.log("tamanioX= " + tamanioX);
-      console.log("tamanioY= " + tamanioY);
-    }
-    if (keyCode === RIGHT_ARROW) {
-      tamanioY=tamanioY+10;
-      console.log("tamanioX= " + tamanioX);
-      console.log("tamanioY= " + tamanioY);
+  function mouseClicked() {
+    if (estado === 0 ) { //DIBUJA CIRCULOS
+    circles.push(new Circle(mouseX, mouseY, tamanioX/2, cCircle));
     }
 
-    if (keyCode === CONTROL) {
-        selector++;
-        if (selector>=colores.length){
-            selector=0;
+    if (estado === 1 ) { //DIBUJA RECTANGULOS
+    rectangles.push(new Rectangle(mouseX, mouseY, tamanioX, tamanioY, cRect));
         }
-        console.log(selector);
-    }
- 
-      
+}
+
+
   
-  }
+// ---- Pitch detection ---
+function startPitch() {
+  pitch = ml5.pitchDetection(model_url, audioContext , mic.stream, modelLoaded);
+  console.log("hecho")
+
+}
+
+function modelLoaded() {
+  getPitch();
+}
+
+function getPitch() {
+  pitch.getPitch(function(err, frequency) {
+    if (frequency) {
+
+      gestorPitch.actualizar(frequency);    
+    } 
+    getPitch();
+  })
+}
 
