@@ -1,14 +1,15 @@
-class Circle{
-    constructor(x, y, r, cCircle) {
+class Triangle{
+    constructor(x, y, s , r, cTriangle) {
         this.x = x;
         this.y = y;
+        this.size = s;
         this.size = r;
-        this.colorCircle = cCircle;
+        this.colorTriangle = cTriangle;
         let options = {
             friction: 1,
-            restitution: 1
+            restitution: 0.5
         }
-        this.body = Bodies.circle(this.x, this.y, this.size,  options);
+        this.body = Bodies.polygon(x, y, sides, radius, [options])
         Composite.add(world, this.body);
     }
 
@@ -21,8 +22,8 @@ class Circle{
         rectMode(CENTER);
         strokeWeight(7)
         stroke(0, 0, 0, 255);
-        fill(this.colorCircle);
-        ellipse(0, 0, this.size*2);
+        fill(this.colorTriangle);
+        triangle(0, 0, this.size*2);
         pop();
     }
     
@@ -36,7 +37,7 @@ class Circle{
         rectMode(CENTER);
         noStroke();
         fill (color('#D8CEAD'));
-        ellipse(0, 0, this.size*2+40);
+        triang(0, 0, this.size);
         pop();
   }
 

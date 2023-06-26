@@ -12,6 +12,7 @@ html, body {
 
 canvas{
   float: left;
+  
 }
 
 h1{
@@ -22,11 +23,16 @@ h2{  margin: -0px;
 }
 h3{  margin: 0px;
 }
+
+h4{
+  text-align: left; position: absolute; top: 200px; left: 100px;
+  color: #292929;
+}
+div{
+  text-align: left; position: absolute; top: 250px; left: 100px;color: #292929;
+}
 p {
 float: right;
   margin-top: -140px;
   margin-bottom: 10px;
 }
-
-
-

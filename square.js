@@ -1,15 +1,14 @@
-class Rectangle{
-    constructor(x, y, tamanioX, tamanioY, cRect) {
+class Square{
+    constructor(x, y, tamanioX, tamanioX, cForma) {
         this.x = x;
         this.y = y;
         this.sizeX = tamanioX;
-        this.sizeY = tamanioY;
-        this.colorRect = cRect;
+        this.colorSquare = cForma;
         let options = {
             friction: 1,
-            restitution: 0.5
+            restitution: 1
         }
-        this.body = Bodies.rectangle(this.x, this.y, this.sizeX, this.sizeY, options);
+        this.body = Bodies.rectangle(this.x, this.y, this.sizeX, this.sizeX,  options);
         Composite.add(world, this.body);
     }
 
@@ -20,11 +19,10 @@ class Rectangle{
         translate(pos.x, pos.y);
         rotate(angle);
         rectMode(CENTER);
-        strokeWeight(5)
+        strokeWeight(7)
         stroke(0,0,0,255);
-        fill(this.colorRect);
-        rect(0,0, this.sizeX, this.sizeY);
-
+        fill(this.colorSquare);
+        rect(0,0, this.sizeX, this.sizeX);
         pop();
     }
 
@@ -37,7 +35,7 @@ class Rectangle{
         rectMode(CENTER);
         noStroke();
         fill (color('#D8CEAD'));
-        rect(0,0, this.sizeX*1.5, this.sizeY*1.5);
+        rect(0,0, this.sizeX+40, this.sizeX+40 );
         pop();
       }
 

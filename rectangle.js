@@ -1,14 +1,15 @@
-class Circle{
-    constructor(x, y, r, cCircle) {
+class Rectangle{
+    constructor(x, y, tamanioX, tamanioY, cForma) {
         this.x = x;
         this.y = y;
-        this.size = r;
-        this.colorCircle = cCircle;
+        this.sizeX = tamanioX;
+        this.sizeY = tamanioY;
+        this.colorRect = cForma;
         let options = {
             friction: 1,
             restitution: 1
         }
-        this.body = Bodies.circle(this.x, this.y, this.size,  options);
+        this.body = Bodies.rectangle(this.x, this.y, this.sizeX, this.sizeY, options);
         Composite.add(world, this.body);
     }
 
@@ -20,13 +21,14 @@ class Circle{
         rotate(angle);
         rectMode(CENTER);
         strokeWeight(7)
-        stroke(0, 0, 0, 255);
-        fill(this.colorCircle);
-        ellipse(0, 0, this.size*2);
+        stroke(0,0,0,255);
+        fill(this.colorRect);
+
+        rect(0,0, this.sizeX, this.sizeY);
+
         pop();
     }
-    
-    
+
     bottomShow() {
         let pos = this.body.position;
         let angle = this.body.angle;
@@ -36,9 +38,9 @@ class Circle{
         rectMode(CENTER);
         noStroke();
         fill (color('#D8CEAD'));
-        ellipse(0, 0, this.size*2+40);
+        rect(0,0, this.sizeX+40, this.sizeY+40);
         pop();
-  }
+      }
 
       
 }
