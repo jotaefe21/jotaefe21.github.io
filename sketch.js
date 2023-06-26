@@ -137,7 +137,7 @@ function draw() {
   //----SONIDO----
   let vol = mic.getLevel(); // cargo en vol la amplitud del micrófono (señal cruda);
   gestorAmp.actualizar(vol);
-  haySonido = gestorAmp.filtrada > 0.15; // umbral de ruido que define el estado haySonido
+  haySonido = gestorAmp.filtrada > 0.16; // umbral de ruido que define el estado haySonido
   let inicioElSonido = haySonido && !antesHabiaSonido; // evendo de INICIO de un sonido
   let finDelSonido = !haySonido && antesHabiaSonido; // evento de fIN de un sonido
 
