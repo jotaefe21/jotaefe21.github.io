@@ -1,4 +1,3 @@
-
 const { Engine, World, Bodies, Composite } = Matter;
 Matter.use('matter-attractors');
 
@@ -29,6 +28,7 @@ let tiempoLimite = 2500;
 let ahora;
 let startTime;
 let elapsedTime;
+let redondeado;
 let tiempoGlobal = 0;
 
 //----OTROS----
@@ -36,8 +36,10 @@ let estado = "inicio";
 let forma = 0;
 let selector = 0;
 let bottomLayer;
+let textureLayer;
 let gravity = 0.00005;
 let cantidad;
+let textura;
 
 
 //----MATTER---
@@ -64,6 +66,7 @@ let coloresDes = [];
 
 function setup() {
   createCanvas(800, 800);
+  textureLayer = loadImage("/45-degree-fabric-light.png");
   startTime = millis(); // Captura el tiempo en el que se llamó a la función setup()
   bottomLayer = createGraphics(800, 800);
   colores[0] = color(228, 185, 30);
@@ -80,8 +83,8 @@ function setup() {
   coloresDes[4] = color(150, 38, 124, 50);
   coloresDes[5] = color(200, 2, 16, 50);
 
-  cForma = colores[0];
-  cFormaPrev = coloresDes[0]
+  cForma = colores[random(0,5)];
+  cFormaPrev = coloresDes[random(0,5)];
 
   //----SONIDO----
   audioContext = getAudioContext(); // inicia el motor de audio
@@ -116,10 +119,7 @@ function setup() {
       }
     });
   World.add(world, attractiveBody);
-  console.log(attractiveBody);
-
   world.gravity.scale = 0;
-
 }
 
 
@@ -127,8 +127,8 @@ function draw() {
   background(233);
   Engine.update(engine);
   limitar();
-  console.log("El estado es ", estado);
-  console.log("CAnridad de figuras", cantidad);
+  //console.log("El estado es ", estado);
+  //console.log("CAnridad de figuras", cantidad);
   elapsedTime = millis() - startTime;
   antesHabiaSonido = haySonido;
   xPrev = random(0 + tamanioX, 800 - tamanioX);
@@ -144,11 +144,19 @@ function draw() {
   //-----------------------------------------------------------------ESTADOS-------
   //----INICIO--------
   if (estado == "inicio") {
+    
     textSize(32);
     fill(0, 0, 0);
     textAlign(CENTER, CENTER);
-    text("Para comenzar, mantenga un sonido", 400, 350);
-    text("durante 2 segundos", 400, 380);
+    text("Para comenzar mantené un sonido", 400, 200);
+    text("durante 2 segundos", 400, 230);
+    push();
+    textSize(22);
+    text("Una vez comenzado, del lado derecho vas a ver un indicador", 400, 420);
+    text("del estado actual y el tiempo de sonido o de silencio.", 400, 450);
+    text("Debajo vas a ver un previo de la figura que se dibujará.", 400, 490);
+    pop();
+    
     gestorAmp.dibujar(0, 700);
     gestorPitch.dibujar(400, 700);
 
@@ -158,13 +166,12 @@ function draw() {
     if (haySonido) {
       ahora = millis();
       if (ahora - startTime >= 1500) {
-        estado = "tamaño";
-        haySonido = 0;
+        estado = "forma";
       }
     }
   }
 
-  //----AGREGA----
+  //----FORMA----
   if (estado == "forma") {
 
     if (inicioElSonido) {
@@ -179,34 +186,35 @@ function draw() {
     }
     if (!haySonido) {
       ahora = millis();
-      if (ahora - startTime >= 3000) {
+      if (ahora - startTime >= 2000) {
         estado = "color";
         startTime = millis();
       }
     }
 
-    //----GROSOR----
+    //----TAMAÑO----
   } else if (estado == "tamaño") {
-    tamanioX = map(gestorPitch.filtrada, 0.2, 1, 80, 300);
-    tamanioY = map(gestorPitch.filtrada, 0.2, 1, 300, 10);
+    tamanioX = map(gestorPitch.filtrada, 0.5, 1, 80, 300);
+    tamanioY = map(gestorPitch.filtrada, 0.5, 1, 300, 10);
     if (inicioElSonido) {
       startTime = millis();
     }
 
     if (haySonido) {
+      //startTime = millis();
       ahora = millis();
-      if (forma === 0 && ahora - startTime >= 1500) {
+      if (forma === 0 && cantidad <= 50 && ahora - startTime >= 1500) {
         circles.push(new Circle(xPrev, yPrev, tamanioX / 2, cForma));
         antesHabiaSonido = true;
         startTime = millis();
       }
-      else if (forma === 1 && ahora - startTime >= 1500) {
+      else if (forma === 1 && cantidad <= 50 && ahora - startTime >= 1500) {
         squares.push(new Rectangle(xPrev, yPrev, tamanioX, tamanioX, cForma));
         antesHabiaSonido = true;
         startTime = millis();
       }
-      else if (forma === 2 && ahora - startTime >= 1500) {
-        rectangles.push(new Rectangle(xPrev, yPrev, tamanioX, tamanioY, cForma));
+      else if (forma === 2 && cantidad <= 50 && ahora - startTime >= 1500) {
+        rectangles.push(new Rectangle(xPrev, yPrev, tamanioY/5, tamanioY, cForma));
         antesHabiaSonido = true;
         startTime = millis();
       }
@@ -218,7 +226,7 @@ function draw() {
     }
     if (!haySonido) {
       ahora = millis();
-      if (ahora - startTime >= 3000) {
+      if (ahora - startTime >= 2000) {
         estado = "forma";
         startTime = millis();
       }
@@ -228,6 +236,7 @@ function draw() {
 
     if (inicioElSonido) {
       selector++;
+      startTime = millis();
       if (selector >= colores.length) {
         selector = 0;
       }
@@ -239,7 +248,7 @@ function draw() {
 
     if (!haySonido) {
       ahora = millis();
-      if (ahora - startTime >= 3000) {
+      if (ahora - startTime >= 2000) {
         estado = "tamaño";
         startTime = millis();
       }
@@ -277,7 +286,7 @@ function draw() {
   }
 
   if (monitorear) {
-    console.log("hay sonido?", haySonido);
+    //console.log("hay sonido?", haySonido);
     //console.log("la frec esta en: ",gestorPitch.filtrada);
     //console.log("la amp esta en: ",gestorAmp.filtrada);
     //gestorAmp.dibujar(0, 700);
@@ -286,21 +295,16 @@ function draw() {
     textSize(32);
     fill(0, 0, 0);
     text(estado, 700, 40);
+    redondeado = nf(tiempoGlobal/1000, 1, 1);
+    
     if (haySonido) {
       fill(10, 250, 10)
-      text(tiempoGlobal / 1000, 700, 70);
+      text(redondeado, 700, 70);
     }
     else {
-      text(tiempoGlobal / 1000, 700, 70);
+      text(redondeado, 700, 70);
 
     }
-
-    //text(elapsedTime, 600, 80);
-
-    //text(forma, 600, 130);
-
-    //text(startTime, 600, 160);
-    //console.log("estado: ",estado);
 
   }
 
@@ -310,14 +314,14 @@ function draw() {
     if (forma === 0) {
       stroke(0, 0, 0, 30);
       fill(cFormaPrev);
-      ellipse(100, 100, tamanioX);
+      ellipse(700, height/2, tamanioX);
     }
 
     if (forma === 1) {
       fill(cFormaPrev);
       push();
       rectMode(CENTER);
-      rect(100, 100, tamanioX, tamanioX);
+      rect(700, height/2, tamanioX, tamanioX);
       pop();
 
     }
@@ -326,17 +330,13 @@ function draw() {
       fill(cFormaPrev);
       push();
       rectMode(CENTER);
-      rect(100, tamanioY - tamanioY / 4, tamanioX, tamanioY);
+      rect(700, height/2, tamanioY/10, tamanioY);
       pop();
 
     }
+    
   }
-
-
-
-
-
-
+ image (textureLayer,0,0,800,800);
 }
 
 function limitar() {
@@ -376,4 +376,3 @@ function getPitch() {
     getPitch();
   })
 }
-
