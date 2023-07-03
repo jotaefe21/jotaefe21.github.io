@@ -152,9 +152,12 @@ function draw() {
     text("durante 2 segundos", 400, 230);
     push();
     textSize(22);
-    text("Una vez comenzado, del lado derecho vas a ver un indicador", 400, 420);
-    text("del estado actual y el tiempo de sonido o de silencio.", 400, 450);
-    text("Debajo vas a ver un previo de la figura que se dibujará.", 400, 490);
+    text("Una vez comenzado, en la esquina superior derecha vas a ver", 400, 420);
+    text("un indicador del estado actual y el tiempo de sonido o de silencio.", 400, 450);
+    text("Hacia la mitad vas a ver un previo de la figura que se dibujará.", 400, 490);
+    text("Y debajo, un grafico de cómo se registra", 400, 650);
+    text("el volumen y la altura de los sonidos.", 400, 670);
+
     pop();
     
     gestorAmp.dibujar(0, 700);
