@@ -155,7 +155,7 @@ function draw() {
     text("Una vez comenzado, en la esquina superior derecha vas a ver", 400, 420);
     text("un indicador del estado actual y el tiempo de sonido o de silencio.", 400, 450);
     text("Hacia la mitad vas a ver un previo de la figura que se dibujará.", 400, 490);
-    text("Y debajo, un grafico de cómo se registra", 400, 650);
+    text("Y debajo, solo en este estado, un grafico de cómo se registra", 400, 650);
     text("el volumen y la altura de los sonidos.", 400, 670);
 
     pop();
@@ -206,17 +206,17 @@ function draw() {
     if (haySonido) {
       //startTime = millis();
       ahora = millis();
-      if (forma === 0 && cantidad <= 50 && ahora - startTime >= 1500) {
+      if (forma === 0 && cantidad <= 6 && ahora - startTime >= 1500) {
         circles.push(new Circle(xPrev, yPrev, tamanioX / 2, cForma));
         antesHabiaSonido = true;
         startTime = millis();
       }
-      else if (forma === 1 && cantidad <= 50 && ahora - startTime >= 1500) {
+      else if (forma === 1 && cantidad <= 6 && ahora - startTime >= 1500) {
         squares.push(new Rectangle(xPrev, yPrev, tamanioX, tamanioX, cForma));
         antesHabiaSonido = true;
         startTime = millis();
       }
-      else if (forma === 2 && cantidad <= 50 && ahora - startTime >= 1500) {
+      else if (forma === 2 && cantidad <= 6 && ahora - startTime >= 1500) {
         rectangles.push(new Rectangle(xPrev, yPrev, tamanioY/5, tamanioY, cForma));
         antesHabiaSonido = true;
         startTime = millis();
